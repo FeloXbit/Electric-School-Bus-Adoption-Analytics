@@ -46,13 +46,26 @@ This dataset tracks electric school bus (ESB) adoption across the United States.
 ## Repository Structure
 
 ```
-📂 etl-pipeline-project
+📂 etl-pipeline
  ┣ 📂 data_ingestion
+ ┃ ┣ 📜 fetch_data.py  # Python script to extract data from API
+ ┃ ┣ 📜 upload_to_gcs.py  # Script to upload data to Google Cloud Storage
+ ┃ ┗ 📜 Dockerfile  # Docker setup for ingestion step
  ┣ 📂 transformations
+ ┃ ┣ 📜 dbt_project/  # Contains dbt models & configurations
+ ┃ ┣ 📜 transform.sql  # SQL script for initial transformations
+ ┃ ┗ 📜 Dockerfile  # Docker setup for transformations
  ┣ 📂 dashboards
+ ┃ ┣ 📜 dashboard.looker  # Looker dashboard config (if using Looker)
+ ┃ ┣ 📜 tableau_dashboard.twbx  # Tableau workbook (if using Tableau)
+ ┃ ┗ 📜 README.md  # Instructions for setting up dashboards
  ┣ 📜 README.md  # Project documentation
- ┣ 📜 kestra_workflow.yaml  # ETL workflow definition
- ┗ 📜 requirements.txt  # Dependencies
+ ┣ 📜 kestra_workflow.yaml  # ETL workflow definition for Kestra
+ ┣ 📜 requirements.txt  # Python dependencies
+ ┣ 📜 docker-compose.yaml  # Docker Compose file to manage containers
+ ┣ 📜 .env  # Environment variables (API keys, credentials)
+ ┗ 📜 .gitignore  # Ignore unnecessary files
+
 ```
 
 ## How to Run
