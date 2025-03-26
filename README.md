@@ -35,7 +35,7 @@ This dataset tracks electric school bus (ESB) adoption across the United States.
 - Socio-economic characteristics such as **poverty rates, racial composition, and air pollution levels**.
 
 ### Data Source:
-- [Dataset Link] (Provide the actual link here)
+- [Dataset Link] [(https://datasets.wri.org/datasets/electric-school-bus-adoption?map=eyJ2aWV3U3RhdGUiOnsibGF0aXR1ZGUiOjAsImxvbmdpdHVkZSI6MCwiem9vbSI6M30sImJhc2VtYXAiOiJsaWdodCIsImxhYmVscyI6ImRhcmsiLCJhY3RpdmVMYXllckdyb3VwcyI6W10sImxheWVyc1BhcnNlZCI6W119)]
 
 ### ETL Processing Steps:
 1. **Ingestion:** Extract data from the source API and store it in Google Cloud Storage (GCS).
@@ -59,7 +59,7 @@ This dataset tracks electric school bus (ESB) adoption across the United States.
 
 1. Clone the repository:
    ```sh
-   git clone https://github.com/your-username/etl-pipeline-project.git
+   git clone https://github.com/FeloXbit/Electric-School-Bus-Adoption-Analytics.git
    cd etl-pipeline-project
    ```
 2. Install required dependencies:
