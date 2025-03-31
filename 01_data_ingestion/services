@@ -1,0 +1,15 @@
+docker run -p 8081:80 \
+  -e PGADMIN_DEFAULT_EMAIL=admin@example.com \
+  -e PGADMIN_DEFAULT_PASSWORD=postgres \
+  -d dpage/pgadmin4
+
+
+  docker run --name my-postgres \
+  -e POSTGRES_PASSWORD=admin \
+  -e POSTGRES_USER=admin \
+  -e POSTGRES_DB=esba_data \
+  -p 5432:5432 \
+  -d postgres:latest
+
+  docker exec -it my-postgres psql -U admin -d esba_data
+  
