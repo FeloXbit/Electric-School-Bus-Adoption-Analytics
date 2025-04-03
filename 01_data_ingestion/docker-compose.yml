@@ -1,25 +1,36 @@
 version: '3.8'
 
 services:
-  app:
-    build: .
-    environment:
-      - DB_HOST=postgres
-      - DB_NAME=ckan_data
-      - DB_USER=postgres
-      - DB_PASSWORD=postgres
+  kestra:
+    image: your-kestra-image:latest  # Use your pre-built Kestra image
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./flows:/app/flows  # Mount your Kestra flows
     depends_on:
-      - postgres
+      - app
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.app
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+    volumes:
+      - ./scripts:/app/scripts  # Live code reload
 
   postgres:
-    image: postgres:latest
+    image: postgres:13
     environment:
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=esba_data
-    volumes:
-      - pg_data:/var/lib/postgresql/data
+      POSTGRES_PASSWORD: admin
+      POSTGRES_USER: admin
+      POSTGRES_DB: esba_data
     ports:
       - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # Ensure persistent storage
 
 volumes:
-  pg_data:
+  postgres_data:

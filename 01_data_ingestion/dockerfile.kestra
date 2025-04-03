@@ -1,0 +1,12 @@
+FROM python:3.9-slim
+
+RUN pip install --no-cache-dir \
+    requests==2.31.0 \
+    pandas==2.0.3 \
+    kestra==latest
+
+# (Optional) Add any Kestra plugins
+RUN pip install kestra-plugin-postgres==0.8.0
+
+
+CMD ["kestra", "server", "local"]
