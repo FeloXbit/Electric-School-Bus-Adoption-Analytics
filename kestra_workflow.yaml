@@ -1,0 +1,81 @@
+id: api_to_postgres_optimized
+namespace: data_pipeline
+
+tasks:
+  # 1. Fetch data from API
+  - id: fetch_api_data
+    type: io.kestra.plugin.fs.http.Download
+    uri: "https://datasets.wri.org/api/3/action/package_show?id=electric-school-bus-adoption"
+    headers:
+      Accept: "application/json"
+
+  # 2. Parse JSON and prepare SQL
+  - id: generate_sql
+    type: io.kestra.plugin.scripts.python.Script
+    inputFiles:
+      data.json: "{{outputs.fetch_api_data.uri}}"
+    script: |
+      import json
+
+      # Load JSON data from the downloaded file
+      try:
+          with open("data.json") as f:
+              data = json.load(f)
+      except FileNotFoundError:
+          raise ValueError("Data file not found. Check fetch_api_data task.")
+      except json.JSONDecodeError:
+          raise ValueError("Invalid JSON format in the fetched data.")
+
+      # Check if API request was successful
+      if not data.get("success"):
+          raise ValueError("API request failed. Response indicates 'success': False.")
+
+      resources = data["result"].get("resources", [])
+      dataset_id = data["result"]["id"]
+
+      # Handle empty resources case
+      if not resources:
+          raise ValueError("No resources found in the API response.")
+
+      # Generate multi-row INSERT with ON CONFLICT
+      sql = [
+          "INSERT INTO api_resources (id, dataset_id, name, format, url) VALUES"
+      ]
+      rows = []
+      for r in resources:
+          rows.append(
+              f"('{r['id']}', '{dataset_id}', $$'{r['name'].replace('\'', '\'\'')}$$, "
+              f"'{r.get('format', 'Unknown')}', $$'{r['url'].replace('\'', '\'\'')}$$')"
+          )
+
+      sql.append(",\n".join(rows))
+      sql.append("""
+      ON CONFLICT (id) DO UPDATE SET
+          name = EXCLUDED.name,
+          format = EXCLUDED.format,
+          url = EXCLUDED.url,
+          updated_at = NOW()
+      """)
+
+      # Write SQL output
+      with open("output.sql", "w") as f:
+          f.write("\n".join(sql))
+
+      # Store dataset_id for later tasks
+      with open("vars.yaml", "w") as vars_file:
+          vars_file.write(f"dataset_id: {dataset_id}\n")
+
+    outputFiles:
+      - "output.sql"
+      - "vars.yaml"
+
+  # 3. Execute in PostgreSQL
+  - id: load_to_postgres
+    type: io.kestra.plugin.jdbc.postgresql.Query
+    url: jdbc:postgresql://{{secret "POSTGRES_HOST"}}:5432/esba_data
+    username: "{{secret 'POSTGRES_USER'}}"
+    password: "{{secret 'POSTGRES_PASSWORD'}}"
+    sql: "{{ read(outputs.generate_sql.outputFiles.output.sql) }}"
+    fetch: false
+
+
